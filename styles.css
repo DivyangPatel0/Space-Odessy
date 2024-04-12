@@ -1,0 +1,54 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#game-container {
+    width: 100%;
+    height: 100vh;
+    background-color: black;
+    position: relative;
+}
+
+#ship, #alien {
+    position: absolute;
+}
+
+#ship {
+    width: 65px;
+    height: 65px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.laser {
+    width: 2px;
+    height: 20px;
+    background-color: rgb(16, 39, 239);
+    position: absolute;
+    z-index: 1; /* Ensure the laser appears in front of other elements */
+}
+
+.alien {
+    width: 75px;
+    height: 75px;
+    background-image: url('icons/alien.png'); /* Replace 'path_to_your_alien_image.png' with the actual path to your alien image */
+    background-size: cover; /* Adjust as needed */
+    position: absolute;
+}
+
+/* Heart icon styles */
+#lives-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: red;
+    font-size: 32px;
+}
+
+#lives-container span {
+    font-size: 24px;
+}
+
