@@ -105,8 +105,8 @@ function shootLaser() {
         newLaser.style.top = laserPositionY + 'px';
 
         let aliens = document.querySelectorAll('.alien');
-        let asteroids = document.querySelectorAll('#asteroid');
-        let meteoroids = document.querySelectorAll('#meteoroid');
+        let asteroids = document.querySelectorAll('.asteroid');
+        let meteoroids = document.querySelectorAll('.meteoroid');
 
         aliens.forEach(alien => {
             let alienRect = alien.getBoundingClientRect();
