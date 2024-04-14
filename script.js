@@ -28,7 +28,7 @@ document.getElementById('game-container').appendChild(yellowLine);
 // Rest of the JavaScript code remains unchanged
 // Make sure to include the remaining code here
 
-const shipSpeed = 10;
+const shipSpeed = 12;
 const alienSpeed = 2; // Adjust the alien speed as needed
 
 let lives = 5; // Player lives
