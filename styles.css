@@ -10,7 +10,7 @@ body {
     position: relative;
 }
 
-#ship, #alien {
+#ship, #alien, #asteroid, #meteoroid {
     position: absolute;
 }
 
@@ -48,7 +48,36 @@ body {
     font-size: 32px;
 }
 
+#asteroid {
+    width: 50px;
+    height: 50px;
+    background-image: url('icons/asteroid1.png'); 
+    background-size: cover; /* Adjust as needed */
+    position: absolute;
+}
+
+#meteoroid {
+    width: 35px;
+    height: 35px;
+    background-image: url('icons/meteorite2.png');
+    background-size: cover; /* Adjust as needed */
+    position: absolute;
+}
+
 #lives-container span {
     font-size: 24px;
+}
+
+/* Add these styles to position and style the game info */
+#game-info {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 18px;
+}
+
+#score, #aliens-destroyed {
+    margin-bottom: 5px;
 }
 

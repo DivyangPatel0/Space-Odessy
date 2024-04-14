@@ -2,6 +2,8 @@ const laser = document.getElementById('laser');
 let laserInterval;
 let alienInterval;
 let lasers = [];
+let asteroids = [];
+let meteoroids = [];
 
 // Initialize ship position with its initial position on the screen
 let ship = document.getElementById('ship');
@@ -46,8 +48,6 @@ function updateLives() {
     livesContainer.textContent = heartIcons; // Set the text content to display heart icons
 }
 
-
-
 // Initialize lives display
 updateLives();
 
@@ -81,27 +81,14 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-document.addEventListener('keyup', function(event) {
-    const key = event.key.toLowerCase();
-    switch (key) {
-        case 'arrowup':
-        case 'arrowdown':
-        case 'arrowleft':
-        case 'arrowright':
-            isMoving = false;
-            break;
-        case ' ':
-            isShooting = false;
-            break;
-        default:
-            break;
-    }
-});
-
 let laserIntervals = [];
 let alienIntervals = [];
 
 function shootLaser() {
+    // Reduce score by 20 for every laser fired
+    score -= 20;
+    updateScoreAndAliensDestroyed();
+
     let newLaser = document.createElement('div');
     newLaser.className = 'laser';
     document.getElementById('game-container').appendChild(newLaser);
@@ -118,6 +105,8 @@ function shootLaser() {
         newLaser.style.top = laserPositionY + 'px';
 
         let aliens = document.querySelectorAll('.alien');
+        let asteroids = document.querySelectorAll('#asteroid');
+        let meteoroids = document.querySelectorAll('#meteoroid');
 
         aliens.forEach(alien => {
             let alienRect = alien.getBoundingClientRect();
@@ -131,13 +120,50 @@ function shootLaser() {
                 newLaser.remove();
                 alien.remove();
                 clearInterval(alienInterval);
-                //alert('Alien Destroyed!');
+                destroyAlien(); // Call the destroyAlien function to update score and count of aliens destroyed
+                isShooting = false; // Reset the shooting flag
+            }
+        });
+        
+
+        asteroids.forEach(asteroid => {
+            let asteroidRect = asteroid.getBoundingClientRect();
+            if (
+                laserPositionX > asteroidRect.left &&
+                laserPositionX < asteroidRect.right &&
+                laserPositionY > asteroidRect.top &&
+                laserPositionY < asteroidRect.bottom
+            ) {
+                clearInterval(intervalId);
+                newLaser.remove();
+                asteroid.remove();
+                score += 50; // Increase score by 50 for destroying an asteroid
+                updateScoreAndAliensDestroyed();
+                isShooting = false; // Reset the shooting flag
+            }
+        });
+
+        meteoroids.forEach(meteoroid => {
+            let meteoroidRect = meteoroid.getBoundingClientRect();
+            if (
+                laserPositionX > meteoroidRect.left &&
+                laserPositionX < meteoroidRect.right &&
+                laserPositionY > meteoroidRect.top &&
+                laserPositionY < meteoroidRect.bottom
+            ) {
+                clearInterval(intervalId);
+                newLaser.remove();
+                meteoroid.remove();
+                score += 25; // Increase score by 25 for destroying a meteoroid
+                updateScoreAndAliensDestroyed();
+                isShooting = false; // Reset the shooting flag
             }
         });
 
         if (laserPositionY < 0) {
             clearInterval(intervalId);
             newLaser.remove();
+            isShooting = false; // Reset the shooting flag
         }
     }, 1);
 
@@ -153,16 +179,27 @@ function moveShip(direction) {
             shipPositionY = Math.min(window.innerHeight - ship.offsetHeight, shipPositionY + shipSpeed);
             break;
         case 'left':
-            shipPositionX = Math.max(0, shipPositionX - shipSpeed);
+            // If the ship reaches the left edge, teleport it to the right edge
+            if (shipPositionX <= 0) {
+                shipPositionX = window.innerWidth - ship.offsetWidth;
+            } else {
+                shipPositionX = Math.max(0, shipPositionX - shipSpeed);
+            }
             break;
         case 'right':
-            shipPositionX = Math.min(window.innerWidth - ship.offsetWidth, shipPositionX + shipSpeed);
+            // If the ship reaches the right edge, teleport it to the left edge
+            if (shipPositionX + ship.offsetWidth >= window.innerWidth) {
+                shipPositionX = 0;
+            } else {
+                shipPositionX = Math.min(window.innerWidth - ship.offsetWidth, shipPositionX + shipSpeed);
+            }
             break;
         default:
             break;
     }
     updateShipPosition();
 }
+
 
 function updateShipPosition() {
     ship.style.left = shipPositionX + 'px';
@@ -174,7 +211,10 @@ function createAlien() {
     newAlien.className = 'alien';
     document.getElementById('game-container').appendChild(newAlien);
 
-    let alienPositionX = Math.floor(Math.random() * (window.innerWidth - 50));
+    let minPositionX = 100; // Minimum X position
+    let maxPositionX = window.innerWidth - 100; // Maximum X position
+    let alienPositionX = Math.floor(Math.random() * (maxPositionX - minPositionX)) + minPositionX;
+
     let alienPositionY = -75;
 
     newAlien.style.left = alienPositionX + 'px';
@@ -182,6 +222,7 @@ function createAlien() {
 
     return newAlien;
 }
+
 
 function moveAlien(newAlien) {
     let hasCrossedLine = false; // Flag to track if the alien has crossed the yellow line in this crossing event
@@ -207,11 +248,6 @@ function moveAlien(newAlien) {
             // Increment the count of aliens that crossed the yellow line
             aliensCrossedLine++;
             hasCrossedLine = true; // Set the flag to true to indicate that the alien has crossed the line in this event
-            console.log(aliensCrossedLine);
-            if (aliensCrossedLine >= 5) {
-                // Game over when 5 or more aliens cross the yellow line
-                alert('Game Over!');
-            }
             alienIntervals.push(intervalId);
             // Decrease lives if an alien crosses the yellow line
             lives--;
@@ -228,6 +264,112 @@ function createAndMoveAlien() {
             moveAlien(newAlien);
         }
     }
+
+    // Check if lives are zero and display "Game Over" popup
+    if (lives <= 0) {
+        alert('Game Over!');
+    }
 }
 
+
 setInterval(createAndMoveAlien, 2000);
+
+let score = 100; // Initialize score
+let aliensDestroyed = 0; // Initialize count of aliens destroyed
+
+function updateScoreAndAliensDestroyed() {
+    // Update score display
+    document.getElementById('score').textContent = 'Score: ' + score;
+
+    // Update aliens destroyed display
+    document.getElementById('aliens-destroyed').textContent = 'Aliens Destroyed: ' + aliensDestroyed;
+}
+
+// Increment score every second
+setInterval(function() {
+    // Only update score if lives are greater than 0
+    if (lives > 0) {
+        score++;
+        updateScoreAndAliensDestroyed();
+    }
+}, 1000);
+
+// Update score when an alien is destroyed
+function destroyAlien() {
+    aliensDestroyed++;
+    score += 80; // Increase score by 80 for every alien destroyed
+    updateScoreAndAliensDestroyed();
+}
+
+
+function createAsteroid() {
+    let newAsteroid = document.createElement('div');
+    newAsteroid.id = 'asteroid';
+    newAsteroid.className = 'asteroid';
+    document.getElementById('game-container').appendChild(newAsteroid);
+
+    let minPositionX = 100; // Minimum X position
+    let maxPositionX = window.innerWidth - 100; // Maximum X position
+    let asteroidPositionX = Math.floor(Math.random() * (maxPositionX - minPositionX)) + minPositionX;
+
+    let asteroidPositionY = -75;
+
+    newAsteroid.style.left = asteroidPositionX + 'px';
+    newAsteroid.style.top = asteroidPositionY + 'px';
+
+    return newAsteroid;
+}
+
+
+function createMeteoroid() {
+    let newMeteoroid = document.createElement('div');
+    newMeteoroid.id = 'meteoroid';
+    newMeteoroid.className = 'meteoroid';
+    document.getElementById('game-container').appendChild(newMeteoroid);
+
+    let minPositionX = 100; // Minimum X position
+    let maxPositionX = window.innerWidth - 100; // Maximum X position
+    let meteoroidPositionX = Math.floor(Math.random() * (maxPositionX - minPositionX)) + minPositionX;
+
+    let meteoroidPositionY = -75;
+
+    newMeteoroid.style.left = meteoroidPositionX + 'px';
+    newMeteoroid.style.top = meteoroidPositionY + 'px';
+
+    return newMeteoroid;
+}
+
+function createAndMoveAsteroidMeteoroid() {
+    // Randomly decide whether to create an asteroid or a meteoroid
+    if (Math.random() < 0.05) { // Adjust the probability as needed
+        let newAsteroid = createAsteroid();
+        if (newAsteroid) {
+            moveAsteroidMeteoroid(newAsteroid);
+        }
+    } else if (Math.random() < 0.05) { // Adjust the probability as needed
+        let newMeteoroid = createMeteoroid();
+        if (newMeteoroid) {
+            moveAsteroidMeteoroid(newMeteoroid);
+        }
+    }
+}
+
+function moveAsteroidMeteoroid(element) {
+    let intervalId = setInterval(function() {
+        let elementPositionY = parseInt(element.style.top) || 0;
+        elementPositionY += 2; // Adjust the speed as needed
+        element.style.top = elementPositionY + 'px';
+
+        if (!document.contains(element)) {
+            clearInterval(intervalId);
+            return;
+        }
+
+        if (elementPositionY >= window.innerHeight - element.offsetHeight) {
+            clearInterval(intervalId);
+            element.remove();
+        }
+    }, 10);
+}
+
+setInterval(createAndMoveAsteroidMeteoroid, 3000); // Adjust the interval as needed
