@@ -48,7 +48,7 @@ body {
     font-size: 32px;
 }
 
-#asteroid {
+.asteroid {
     width: 50px;
     height: 50px;
     background-image: url('icons/asteroid1.png'); 
@@ -56,7 +56,7 @@ body {
     position: absolute;
 }
 
-#meteoroid {
+.meteoroid {
     width: 35px;
     height: 35px;
     background-image: url('icons/meteorite2.png');
